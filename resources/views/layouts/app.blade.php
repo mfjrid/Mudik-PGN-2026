@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Inter & Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --pgn-blue: #0056b3;
@@ -65,11 +67,31 @@
                         <a class="btn btn-primary px-4" href="{{ route('register') }}">Daftar Sekarang</a>
                     </li>
                 @else
-                    <li class="nav-item ms-lg-3">
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-light px-4">Logout</button>
-                        </form>
+                    @role('superadmin|admin-kc')
+                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('admin.buses.index') }}">Kelola Bus</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('admin.registrations.index') }}">Verifikasi</a></li>
+                    @endrole
+
+                    @role('passenger')
+                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('passenger.registration.step1') }}">Pendaftaran</a></li>
+                    @endrole
+
+                    @role('check-in-officer')
+                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('officer.scan') }}">Check-In</a></li>
+                    @endrole
+
+                    <li class="nav-item dropdown ms-lg-3">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary">
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-white border-0 bg-transparent">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
                 @endguest
             </ul>
@@ -88,5 +110,6 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@stack('scripts')
 </body>
 </html>
