@@ -17,7 +17,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Admin Routes
-Route::middleware(['auth', 'role:superadmin|admin_kc'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:superadmin|admin-kc'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('buses', \App\Http\Controllers\BusController::class);
     Route::get('/registrations', [\App\Http\Controllers\BusController::class, 'registrations'])->name('registrations.index');
     Route::get('/registrations/{registration}', [\App\Http\Controllers\BusController::class, 'registrationShow'])->name('registrations.show');

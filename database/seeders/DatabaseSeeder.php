@@ -17,14 +17,18 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            BusSeeder::class,
         ]);
 
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'no_kk' => '1234567890123456',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'no_kk' => '1234567890123456',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]
+        );
     }
 }
