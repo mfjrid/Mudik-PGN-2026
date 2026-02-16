@@ -6,22 +6,86 @@
     <title>{{ $title ?? 'Mudik PGN 2026' }}</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .auth-card { max-width: 450px; margin-top: 50px; }
+        :root {
+            --pgn-blue: #0056b3;
+            --pgn-light-blue: #e7f1ff;
+            --pgn-orange: #ff7b00;
+        }
+        body { 
+            background-color: #fcfcfc; 
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+        h1, h2, h3, .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+        }
+        .navbar {
+            background: rgba(0, 86, 179, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-primary {
+            background-color: var(--pgn-blue);
+            border-color: var(--pgn-blue);
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #004494;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="/">Mudik PGN 2026</a>
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="https://www.pgn.co.id/img/logo.png" alt="PGN Logo" height="40" class="me-2 filter-white" onerror="this.src='https://placehold.co/100x40?text=PGN'">
+            Mudik PGN 2026
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link text-white" href="#about">Tentang</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#routes">Rute</a></li>
+                @guest
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-outline-light px-4" href="{{ route('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-primary px-4" href="{{ route('register') }}">Daftar Sekarang</a>
+                    </li>
+                @else
+                    <li class="nav-item ms-lg-3">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-light px-4">Logout</button>
+                        </form>
+                    </li>
+                @endguest
+            </ul>
+        </div>
     </div>
 </nav>
 
-<div class="container">
+<main>
     @yield('content')
-</div>
+</main>
+
+<footer class="bg-dark text-white py-5 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2026 Perusahaan Gas Negara (PGN). Semua Hak Dilindungi.</p>
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
