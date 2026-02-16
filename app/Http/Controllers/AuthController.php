@@ -19,7 +19,6 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
             'no_kk' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
@@ -27,7 +26,6 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $request->name,
-            'username' => $request->username,
             'no_kk' => $request->no_kk,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -48,13 +46,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'login' => 'required|string',
+            'login' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
-        if (Auth::attempt([$loginType => $request->login, 'password' => $request->password], $request->remember)) {
+        if (Auth::attempt(['email' => $request->login, 'password' => $request->password], $request->remember)) {
             $request->session()->regenerate();
             return redirect()->intended('/');
         }

@@ -23,8 +23,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="login" class="form-label">Username atau Email</label>
-                        <input type="text" name="login" id="login" class="form-control @error('login') is-invalid @enderror" value="{{ old('login') }}" required autofocus>
+                        <label for="login" class="form-label">Email</label>
+                        <input type="email" name="login" id="login" class="form-control @error('login') is-invalid @enderror" value="{{ old('login') }}" required autofocus>
                         @error('login') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 

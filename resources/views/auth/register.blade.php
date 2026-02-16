@@ -29,12 +29,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" name="username" id="username" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required>
-                        @error('username') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label for="no_kk" class="form-label">No. KK</label>
                         <input type="text" name="no_kk" id="no_kk" class="form-control @error('no_kk') is-invalid @enderror" value="{{ old('no_kk') }}" required>
                         @error('no_kk') <div class="invalid-feedback">{{ $message }}</div> @enderror
