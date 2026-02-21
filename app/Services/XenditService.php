@@ -10,7 +10,7 @@ class XenditService
 {
     public function __construct()
     {
-        Configuration::setApiKey(config('services.xendit.api_key'));
+        Configuration::setXenditKey(config('services.xendit.api_key'));
     }
 
     public function createInvoice($registration)
