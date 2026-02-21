@@ -13,13 +13,24 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationController extends Controller
 {
+    private function hasActiveRegistration()
+    {
+        return Registration::where('user_id', Auth::id())
+            ->where('status', '!=', 'cancelled')
+            ->exists();
+    }
     public function step1()
     {
+        if ($this->hasActiveRegistration()) {
+            return redirect()->route('passenger.registration.dashboard')->with('error', 'Anda sudah memiliki pendaftaran yang aktif.');
+        }
         return view('passenger.registration.step1');
     }
 
     public function postStep1(Request $request)
     {
+        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
+        
         // Validation for KK owner and number of members
         $request->validate([
             'total_members' => 'required|integer|min:1|max:4',
@@ -33,12 +44,16 @@ class RegistrationController extends Controller
 
     public function step2()
     {
+        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
+        
         $buses = Bus::all();
         return view('passenger.registration.step2', compact('buses'));
     }
 
     public function postStep2(Request $request)
     {
+        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
+
         $request->validate([
             'bus_id' => 'required|exists:buses,id',
         ]);
@@ -52,6 +67,8 @@ class RegistrationController extends Controller
 
     public function step3()
     {
+        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
+        
         $data = session('registration_data');
         if (!$data || !isset($data['bus_id'])) return redirect()->route('passenger.registration.step1');
         
@@ -61,6 +78,8 @@ class RegistrationController extends Controller
 
     public function postStep3(Request $request)
     {
+        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
+
         $request->validate([
             'selected_seats' => 'required|array',
             'family' => 'required|array',
@@ -121,7 +140,13 @@ class RegistrationController extends Controller
     public function success(Registration $registration, XenditService $xendit)
     {
         $registration->load(['bus', 'user']);
+
+        // 1. If already paid, redirect to dashboard
+        if ($registration->payment_status === 'paid') {
+            return redirect()->route('passenger.registration.dashboard');
+        }
         
+        // 2. Otherwise try to get/create invoice
         try {
             $invoice = $xendit->createInvoice($registration);
             $payment_url = $invoice->getInvoiceUrl();
@@ -131,6 +156,16 @@ class RegistrationController extends Controller
         }
 
         return view('passenger.registration.success', compact('registration', 'payment_url'));
+    }
+
+    public function dashboard()
+    {
+        $registrations = Registration::with(['bus', 'familyMembers.seat'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('passenger.dashboard', compact('registrations'));
     }
 
     public function cancel(Request $request, Registration $registration)

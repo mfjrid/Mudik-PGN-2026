@@ -73,7 +73,10 @@
                     @endrole
 
                     @role('passenger')
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('passenger.registration.step1') }}">Pendaftaran</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" href="{{ route('passenger.registration.dashboard') }}">Dashboard Saya</a></li>
+                        @if(!$hasActiveRegistration)
+                            <li class="nav-item"><a class="nav-link text-white" href="{{ route('passenger.registration.step1') }}">Pendaftaran</a></li>
+                        @endif
                     @endrole
 
                     @role('check-in-officer')

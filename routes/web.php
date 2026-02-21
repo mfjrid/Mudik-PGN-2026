@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:passenger'])->prefix('registration')->name('pas
     Route::get('/step3', [\App\Http\Controllers\RegistrationController::class, 'step3'])->name('step3');
     Route::post('/step3', [\App\Http\Controllers\RegistrationController::class, 'postStep3'])->name('step3.post');
     Route::get('/success/{registration}', [\App\Http\Controllers\RegistrationController::class, 'success'])->name('success');
+    Route::get('/dashboard', [\App\Http\Controllers\RegistrationController::class, 'dashboard'])->name('dashboard');
     Route::post('/cancel/{registration}', [\App\Http\Controllers\RegistrationController::class, 'cancel'])->name('cancel');
 });
 

@@ -52,21 +52,38 @@
                         <div class="col-7 text-info fw-bold">Rp {{ number_format($registration->deposit_amount, 0, ',', '.') }}</div>
                     </div>
 
-                    <div class="alert alert-warning bg-opacity-10 border-warning text-warning mb-0">
-                        <div class="d-flex">
-                            <i class="fas fa-exclamation-triangle mt-1 me-3"></i>
-                            <p class="mb-0 small">Silakan lakukan pembayaran deposit melalui tombol di bawah untuk mengunci kursi Anda. Setelah pembayaran diverifikasi, admin akan memproses pendaftaran Anda ke sistem Jasamarga.</p>
-                        </div>
+            @if($registration->payment_status === 'paid')
+                <div class="alert alert-success bg-opacity-10 border-success text-success mb-5">
+                    <div class="d-flex align-items-center justify-content-center py-2">
+                        <i class="fas fa-check-circle me-3 fs-4"></i>
+                        <h5 class="mb-0 fw-bold">Pembayaran Diterima!</h5>
+                    </div>
+                    <p class="mb-0 mt-2 small">Terima kasih, deposit Anda telah kami terima. Admin akan segera memproses pendaftaran Anda.</p>
+                </div>
+            @else
+                <div class="alert alert-warning bg-opacity-10 border-warning text-warning mb-0">
+                    <div class="d-flex">
+                        <i class="fas fa-exclamation-triangle mt-1 me-3"></i>
+                        <p class="mb-0 small">Silakan lakukan pembayaran deposit melalui tombol di bawah untuk mengunci kursi Anda. Setelah pembayaran diverifikasi, admin akan memproses pendaftaran Anda ke sistem Jasamarga.</p>
                     </div>
                 </div>
-            </div>
+            @endif
+        </div>
+    </div>
 
-            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center" id="payment-container">
-                <button type="button" id="pay-button" class="btn btn-primary btn-lg px-5 py-3 fw-bold text-uppercase" {{ $payment_url == '#' ? 'disabled' : '' }}>
-                    Bayar Sekarang (Xendit)
-                </button>
-                <a href="{{ url('/') }}" class="btn btn-outline-light btn-lg px-5 py-3">Kembali ke Beranda</a>
-            </div>
+    @if($registration->payment_status !== 'paid')
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center" id="payment-container">
+            <button type="button" id="pay-button" class="btn btn-primary btn-lg px-5 py-3 fw-bold text-uppercase" {{ ($payment_url ?? '#') == '#' ? 'disabled' : '' }}>
+                Bayar Sekarang (Xendit)
+            </button>
+            <a href="{{ url('/') }}" class="btn btn-outline-light btn-lg px-5 py-3">Kembali ke Beranda</a>
+        </div>
+    @else
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="{{ route('passenger.registration.dashboard') }}" class="btn btn-primary btn-lg px-5 py-3 fw-bold">Ke Dashboard Saya</a>
+            <a href="#" class="btn btn-outline-light btn-lg px-5 py-3">Unduh Bukti Bayar</a>
+        </div>
+    @endif
 
             <div class="mt-4">
                 <form action="{{ route('passenger.registration.cancel', $registration) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran ini? Kursi Anda akan dilepaskan.')">

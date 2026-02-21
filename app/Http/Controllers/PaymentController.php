@@ -23,10 +23,7 @@ class PaymentController extends Controller
 
         if ($data['status'] === 'PAID') {
             // Extract registration ID from external_id (format: REG-{id}-{time})
-            $externalIdParts = explode('-', $data['external_id']);
-            if (count($externalIdParts) < 2) return response()->json(['message' => 'Invalid external ID'], 400);
-            
-            $registrationId = $externalIdParts[1];
+            $registrationId = str_replace('REG-', '', $data['external_id']);
             $registration = Registration::find($registrationId);
 
             if ($registration) {

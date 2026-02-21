@@ -17,14 +17,14 @@ class XenditService
     {
         $apiInstance = new InvoiceApi();
         $create_invoice_request = new CreateInvoiceRequest([
-            'external_id' => 'REG-' . $registration->id . '-' . time(),
+            'external_id' => 'REG-' . $registration->id,
             'amount' => $registration->deposit_amount,
             'description' => 'Deposit Pendaftaran Mudik PGN 2026 - registration #' . $registration->id,
             'customer' => [
                 'given_names' => $registration->user->name,
                 'email' => $registration->user->email,
             ],
-            'success_redirect_url' => route('passenger.registration.success', $registration),
+            'success_redirect_url' => route('passenger.registration.dashboard'),
         ]);
 
         try {
