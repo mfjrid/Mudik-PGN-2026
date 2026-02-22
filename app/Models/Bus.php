@@ -10,6 +10,7 @@ class Bus extends Model
         'bus_number',
         'route_name',
         'capacity',
+        'layout_type',
     ];
 
     public function seats()

@@ -44,25 +44,21 @@ class BusController extends Controller
             'bus_number' => 'required|unique:buses',
             'route_name' => 'required',
             'capacity' => 'required|integer|min:1',
+            'layout_type' => 'required|in:2-2,2-1',
         ]);
 
         $bus = Bus::create($request->all());
 
-        // Automatically create seats for the bus
-        for ($i = 1; $i <= $request->capacity; $i++) {
-            Seat::create([
-                'bus_id' => $bus->id,
-                'seat_number' => $i,
-                'status' => 'available',
-            ]);
-        }
+        $this->regenerateSeats($bus);
 
-        return redirect()->route('admin.buses.index')->with('success', 'Bus and seats created successfully.');
+        return redirect()->route('admin.buses.index')->with('success', 'Bus and seats created successfully with ' . $bus->layout_type . ' layout.');
     }
 
     public function show(Bus $bus)
     {
-        $bus->load('seats');
+        $bus->load(['seats' => function($q) {
+            $q->orderBy('row')->orderBy('column');
+        }]);
         return view('admin.buses.show', compact('bus'));
     }
 
@@ -77,11 +73,71 @@ class BusController extends Controller
             'bus_number' => 'required|unique:buses,bus_number,' . $bus->id,
             'route_name' => 'required',
             'capacity' => 'required|integer|min:1',
+            'layout_type' => 'required|in:2-2,2-1',
         ]);
+
+        $oldCapacity = $bus->capacity;
+        $oldLayout = $bus->layout_type;
 
         $bus->update($request->all());
 
+        // Regenerate seats if layout or capacity changed
+        if ($oldCapacity != $bus->capacity || $oldLayout != $bus->layout_type) {
+            // Check if there are already registrations for this bus
+            if ($bus->registrations()->where('status', '!=', 'cancelled')->exists()) {
+                return redirect()->route('admin.buses.index')->with('warning', 'Bus updated, but seats were NOT regenerated because there are active registrations. Please manage seats manually or clear registrations first.');
+            }
+            $this->regenerateSeats($bus);
+            return redirect()->route('admin.buses.index')->with('success', 'Bus updated and seats regenerated successfully.');
+        }
+
         return redirect()->route('admin.buses.index')->with('success', 'Bus updated successfully.');
+    }
+
+    private function regenerateSeats(Bus $bus)
+    {
+        // Delete existing seats if any
+        $bus->seats()->delete();
+
+        $capacity = $bus->capacity;
+        $layout = $bus->layout_type; // '2-2' or '2-1'
+        
+        $seatCounter = 1;
+        $row = 1;
+
+        if ($layout === '2-2') {
+            while ($seatCounter <= $capacity) {
+                for ($col = 1; $col <= 5; $col++) {
+                    if ($col === 3) continue; // Aisle
+                    if ($seatCounter > $capacity) break;
+
+                    Seat::create([
+                        'bus_id' => $bus->id,
+                        'seat_number' => $seatCounter++,
+                        'row' => $row,
+                        'column' => $col,
+                        'status' => 'available',
+                    ]);
+                }
+                $row++;
+            }
+        } elseif ($layout === '2-1') {
+            while ($seatCounter <= $capacity) {
+                for ($col = 1; $col <= 4; $col++) {
+                    if ($col === 3) continue; // Aisle
+                    if ($seatCounter > $capacity) break;
+
+                    Seat::create([
+                        'bus_id' => $bus->id,
+                        'seat_number' => $seatCounter++,
+                        'row' => $row,
+                        'column' => $col,
+                        'status' => 'available',
+                    ]);
+                }
+                $row++;
+            }
+        }
     }
 
     public function destroy(Bus $bus)

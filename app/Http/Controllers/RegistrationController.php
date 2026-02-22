@@ -31,9 +31,11 @@ class RegistrationController extends Controller
 
     public function getSeats(Bus $bus)
     {
-        $seats = $bus->seats()->orderBy('id')->get();
+        $seats = $bus->seats()->orderBy('row')->orderBy('column')->get();
         return response()->json([
-            'seats' => $seats
+            'seats' => $seats,
+            'max_col' => $bus->seats()->max('column'),
+            'max_row' => $bus->seats()->max('row'),
         ]);
     }
 

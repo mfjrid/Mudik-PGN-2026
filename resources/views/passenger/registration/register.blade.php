@@ -100,6 +100,9 @@
                                 </div>
                                 <div class="card-body p-4">
                                     <div class="bus-layout border border-secondary rounded p-4 bg-black mb-4">
+                                        <div class="text-center text-white-50 small mb-4 border-bottom border-secondary pb-2">
+                                            <i class="fas fa-steering-wheel me-2"></i> DEPAN / SUPIR
+                                        </div>
                                         <div class="row row-cols-4 g-3" id="seat-grid">
                                             <!-- Dynamically populated via AJAX -->
                                             <div class="col-12 text-center py-5">
@@ -237,20 +240,31 @@
                 grid.innerHTML = '';
                 const oldSeats = {!! json_encode(old('selected_seats', [])) !!};
                 
+                // Set CSS grid layout
+                grid.style.display = 'grid';
+                grid.style.gridTemplateColumns = `repeat(${data.max_col}, 45px)`;
+                grid.style.justifyContent = 'center';
+                grid.style.gap = '10px';
+                grid.classList.remove('row', 'row-cols-4'); // Remove old bootstrap classes
+
                 data.seats.forEach(seat => {
                     const isSelected = oldSeats.includes(seat.id.toString());
                     const statusClass = seat.status === 'available' ? (isSelected ? 'selected' : 'available') : 'occupied';
                     
-                    grid.innerHTML += `
-                        <div class="col text-center">
-                            <div class="seat-item rounded small fw-bold ${statusClass}" 
-                                 onclick="toggleSeat(this, ${seat.id})"
+                    const seatEl = document.createElement('div');
+                    seatEl.className = 'text-center';
+                    seatEl.style.gridRow = seat.row;
+                    seatEl.style.gridColumn = seat.column;
+                    
+                    seatEl.innerHTML = `
+                        <div class="seat-item rounded small fw-bold ${statusClass}" 
+                             onclick="toggleSeat(this, ${seat.id})"
                                  data-id="${seat.id}">
                                 ${seat.seat_number}
                             </div>
                             <input type="checkbox" name="selected_seats[]" value="${seat.id}" class="d-none seat-check" id="input-seat-${seat.id}" ${isSelected ? 'checked' : ''}>
-                        </div>
                     `;
+                    grid.appendChild(seatEl);
                 });
                 updateSubmitButton();
             });

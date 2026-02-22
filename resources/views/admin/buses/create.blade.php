@@ -28,11 +28,20 @@
                             @error('route_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="capacity" class="form-label text-white-50">Kapasitas Kursi</label>
                             <input type="number" name="capacity" id="capacity" class="form-control bg-dark text-white border-secondary @error('capacity') is-invalid @enderror" value="{{ old('capacity', 40) }}" required min="1">
-                            <div class="form-text text-white-50 small mt-1">Sistem akan otomatis membuat kursi sebanyak kapasitas yang ditentukan.</div>
                             @error('capacity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="layout_type" class="form-label text-white-50">Tipe Layout</label>
+                            <select name="layout_type" id="layout_type" class="form-select bg-dark text-white border-secondary @error('layout_type') is-invalid @enderror" required>
+                                <option value="2-2" {{ old('layout_type') == '2-2' ? 'selected' : '' }}>Standard (2-2)</option>
+                                <option value="2-1" {{ old('layout_type') == '2-1' ? 'selected' : '' }}>Executive (2-1)</option>
+                            </select>
+                            <div class="form-text text-white-50 small mt-1">Sistem akan otomatis membuat kursi dan koordinat denah sesuai kapasitas & layout.</div>
+                            @error('layout_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="d-grid">

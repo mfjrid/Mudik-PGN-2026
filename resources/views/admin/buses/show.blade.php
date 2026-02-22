@@ -25,8 +25,8 @@
                         <span class="text-white fs-5">{{ $bus->route_name }}</span>
                     </div>
                     <div class="mb-0">
-                        <label class="text-white-50 small d-block">Kapasitas</label>
-                        <span class="text-white fs-5">{{ $bus->capacity }} Kursi</span>
+                        <label class="text-white-50 small d-block">Tipe Layout</label>
+                        <span class="text-info fs-5">{{ $bus->layout_type == '2-2' ? 'Standard (2-2)' : 'Executive (2-1)' }}</span>
                     </div>
                 </div>
             </div>
@@ -59,11 +59,14 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="bus-layout border border-secondary rounded p-4 bg-black">
-                        <div class="row row-cols-4 g-3">
+                        <div class="text-center text-white-50 small mb-4 border-bottom border-secondary pb-2">
+                            <i class="fas fa-steering-wheel me-2"></i> DEPAN / SUPIR
+                        </div>
+                        <div class="seat-grid-container" style="display: grid; grid-template-columns: repeat({{ $bus->seats->max('column') }}, 45px); gap: 10px; justify-content: center;">
                             @foreach($bus->seats as $seat)
-                                <div class="col text-center">
+                                <div class="text-center" style="grid-row: {{ $seat->row }}; grid-column: {{ $seat->column }};">
                                     <div class="seat-item p-2 rounded {{ $seat->status == 'available' ? 'bg-success' : ($seat->status == 'reserved' ? 'bg-warning text-dark' : 'bg-danger') }}" 
-                                         style="width: 50px; height: 50px; cursor: default;"
+                                         style="width: 45px; height: 45px; cursor: default; display: flex; align-items: center; justify-content: center;"
                                          title="Kursi {{ $seat->seat_number }} ({{ $seat->status }})">
                                         <small class="fw-bold">{{ $seat->seat_number }}</small>
                                     </div>

@@ -29,11 +29,24 @@
                             @error('route_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="capacity" class="form-label text-white-50">Kapasitas Kursi</label>
                             <input type="number" name="capacity" id="capacity" class="form-control bg-dark text-white border-secondary @error('capacity') is-invalid @enderror" value="{{ old('capacity', $bus->capacity) }}" required min="1">
-                            <div class="form-text text-warning small mt-1"><i class="fas fa-exclamation-triangle me-1"></i> Mengubah kapasitas tidak akan otomatis menambah/menghapus kursi yang sudah ada.</div>
                             @error('capacity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="layout_type" class="form-label text-white-50">Tipe Layout</label>
+                            <select name="layout_type" id="layout_type" class="form-select bg-dark text-white border-secondary @error('layout_type') is-invalid @enderror" required>
+                                <option value="2-2" {{ old('layout_type', $bus->layout_type) == '2-2' ? 'selected' : '' }}>Standard (2-2)</option>
+                                <option value="2-1" {{ old('layout_type', $bus->layout_type) == '2-1' ? 'selected' : '' }}>Executive (2-1)</option>
+                            </select>
+                            <div class="form-text text-warning small mt-1">
+                                <i class="fas fa-exclamation-triangle me-1"></i> 
+                                Mengubah Kapasitas atau Tipe Layout akan <strong>menghapus & membuat ulang</strong> kursi. 
+                                Ini akan gagal jika sudah ada pendaftaran aktif di bus ini.
+                            </div>
+                            @error('layout_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="d-grid">

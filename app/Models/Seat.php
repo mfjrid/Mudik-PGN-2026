@@ -9,6 +9,8 @@ class Seat extends Model
     protected $fillable = [
         'bus_id',
         'seat_number',
+        'row',
+        'column',
         'status',
     ];
 
