@@ -19,80 +19,51 @@ class RegistrationController extends Controller
             ->where('status', '!=', 'cancelled')
             ->exists();
     }
-    public function step1()
+    public function create()
     {
         if ($this->hasActiveRegistration()) {
             return redirect()->route('passenger.registration.dashboard')->with('error', 'Anda sudah memiliki pendaftaran yang aktif.');
         }
-        return view('passenger.registration.step1');
+
+        $buses = Bus::all();
+        return view('passenger.registration.register', compact('buses'));
     }
 
-    public function postStep1(Request $request)
+    public function getSeats(Bus $bus)
     {
-        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
-        
-        // Validation for KK owner and number of members
+        $seats = $bus->seats()->orderBy('id')->get();
+        return response()->json([
+            'seats' => $seats
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        if ($this->hasActiveRegistration()) {
+            return redirect()->route('passenger.registration.dashboard');
+        }
+
         $request->validate([
             'total_members' => 'required|integer|min:1|max:4',
             'departure_location' => 'required',
-        ]);
-
-        session(['registration_data' => $request->only(['total_members', 'departure_location'])]);
-
-        return redirect()->route('passenger.registration.step2');
-    }
-
-    public function step2()
-    {
-        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
-        
-        $buses = Bus::all();
-        return view('passenger.registration.step2', compact('buses'));
-    }
-
-    public function postStep2(Request $request)
-    {
-        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
-
-        $request->validate([
             'bus_id' => 'required|exists:buses,id',
-        ]);
-
-        $data = session('registration_data', []);
-        $data['bus_id'] = $request->bus_id;
-        session(['registration_data' => $data]);
-
-        return redirect()->route('passenger.registration.step3');
-    }
-
-    public function step3()
-    {
-        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
-        
-        $data = session('registration_data');
-        if (!$data || !isset($data['bus_id'])) return redirect()->route('passenger.registration.step1');
-        
-        $bus = Bus::with('seats')->findOrFail($data['bus_id']);
-        return view('passenger.registration.step3', compact('bus', 'data'));
-    }
-
-    public function postStep3(Request $request)
-    {
-        if ($this->hasActiveRegistration()) return redirect()->route('passenger.registration.dashboard');
-
-        $request->validate([
             'selected_seats' => 'required|array',
             'family' => 'required|array',
         ]);
 
-        $data = session('registration_data');
-        
+        if (count($request->selected_seats) != $request->total_members) {
+            return back()->withInput()->withErrors(['error' => 'Jumlah kursi yang dipilih harus sama dengan jumlah peserta (' . $request->total_members . ' orang).']);
+        }
+
         try {
             DB::beginTransaction();
 
-            // 1. Lock seats and verify availability to prevent race condition
+            $busId = $request->bus_id;
+            $totalMembers = $request->total_members;
+
+            // 1. Lock seats and verify availability
             $seats = Seat::whereIn('id', $request->selected_seats)
-                        ->where('bus_id', $data['bus_id'])
+                        ->where('bus_id', $busId)
                         ->lockForUpdate()
                         ->get();
 
@@ -100,14 +71,18 @@ class RegistrationController extends Controller
                 throw new \Exception('Beberapa kursi sudah tidak tersedia. Silakan pilih kembali.');
             }
 
+            if (count($request->selected_seats) != $totalMembers) {
+                throw new \Exception('Jumlah kursi yang dipilih harus sama dengan jumlah peserta.');
+            }
+
             // 2. Create Registration
             $registration = Registration::create([
                 'user_id' => Auth::id(),
-                'bus_id' => $data['bus_id'],
-                'total_members' => $data['total_members'],
-                'departure_location' => $data['departure_location'],
+                'bus_id' => $busId,
+                'total_members' => $totalMembers,
+                'departure_location' => $request->departure_location,
                 'status' => 'pending',
-                'deposit_amount' => 50000 * $data['total_members'], // Example deposit
+                'deposit_amount' => 50000 * $totalMembers, 
             ]);
 
             // 3. Update Seats and Create Family Members
@@ -121,29 +96,27 @@ class RegistrationController extends Controller
                     'name' => $request->family[$index]['name'],
                     'identity_number' => $request->family[$index]['identity_number'],
                     'age' => $request->family[$index]['age'],
-                    'gender' => 'male', // Default for now
+                    'gender' => 'male', 
                     'is_child' => $request->family[$index]['age'] < 12,
                 ]);
             }
 
             DB::commit();
-            session()->forget('registration_data');
-            
-            return redirect()->route('passenger.registration.success', $registration);
+            return redirect()->route('passenger.registration.payment', $registration);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
-    public function success(Registration $registration, XenditService $xendit)
+    public function payment(Registration $registration, XenditService $xendit)
     {
         $registration->load(['bus', 'user']);
 
-        // 1. If already paid, redirect to dashboard
+        // 1. If already paid, just show the view (it will show 'Paid' status)
         if ($registration->payment_status === 'paid') {
-            return redirect()->route('passenger.registration.dashboard');
+            return view('passenger.registration.success', compact('registration'));
         }
         
         // 2. Otherwise try to get/create invoice
@@ -191,7 +164,7 @@ class RegistrationController extends Controller
             Seat::whereIn('id', $seatIds)->update(['status' => 'available']);
 
             DB::commit();
-            return redirect()->route('passenger.registration.step1')->with('success', 'Pendaftaran berhasil dibatalkan dan kursi dilepaskan.');
+            return redirect()->route('passenger.registration.create')->with('success', 'Pendaftaran berhasil dibatalkan dan kursi dilepaskan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal membatalkan pendaftaran.');

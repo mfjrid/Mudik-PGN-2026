@@ -26,13 +26,12 @@ Route::middleware(['auth', 'role:superadmin|admin-kc'])->prefix('admin')->name('
 
 // Passenger Routes
 Route::middleware(['auth', 'role:passenger'])->prefix('registration')->name('passenger.registration.')->group(function () {
-    Route::get('/step1', [\App\Http\Controllers\RegistrationController::class, 'step1'])->name('step1');
-    Route::post('/step1', [\App\Http\Controllers\RegistrationController::class, 'postStep1']);
-    Route::get('/step2', [\App\Http\Controllers\RegistrationController::class, 'step2'])->name('step2');
-    Route::post('/step2', [\App\Http\Controllers\RegistrationController::class, 'postStep2'])->name('step2.post');
-    Route::get('/step3', [\App\Http\Controllers\RegistrationController::class, 'step3'])->name('step3');
-    Route::post('/step3', [\App\Http\Controllers\RegistrationController::class, 'postStep3'])->name('step3.post');
-    Route::get('/success/{registration}', [\App\Http\Controllers\RegistrationController::class, 'success'])->name('success');
+    // Unified Single Page Registration
+    Route::get('/create', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('create');
+    Route::post('/store', [\App\Http\Controllers\RegistrationController::class, 'store'])->name('store');
+    Route::get('/api/buses/{bus}/seats', [\App\Http\Controllers\RegistrationController::class, 'getSeats'])->name('api.seats');
+
+    Route::get('/payment/{registration}', [\App\Http\Controllers\RegistrationController::class, 'payment'])->name('payment');
     Route::get('/dashboard', [\App\Http\Controllers\RegistrationController::class, 'dashboard'])->name('dashboard');
     Route::post('/cancel/{registration}', [\App\Http\Controllers\RegistrationController::class, 'cancel'])->name('cancel');
 });

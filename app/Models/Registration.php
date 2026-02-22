@@ -3,10 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Registration extends Model
 {
+    protected static function booted()
+    {
+        static::creating(function ($registration) {
+            if (empty($registration->uuid)) {
+                $registration->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     protected $fillable = [
+        'uuid',
         'user_id',
         'bus_id',
         'status',
@@ -19,6 +28,11 @@ class Registration extends Model
         'departure_location',
         'checked_in_at',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     public function user()
     {

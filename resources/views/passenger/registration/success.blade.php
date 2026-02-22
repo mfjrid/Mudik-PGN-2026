@@ -76,7 +76,7 @@
             <button type="button" id="pay-button" class="btn btn-primary btn-lg px-5 py-3 fw-bold text-uppercase" {{ ($payment_url ?? '#') == '#' ? 'disabled' : '' }}>
                 Bayar Sekarang (Xendit)
             </button>
-            <a href="{{ url('/') }}" class="btn btn-outline-light btn-lg px-5 py-3">Kembali ke Beranda</a>
+            <a href="{{ route('passenger.registration.dashboard') }}" class="btn btn-outline-light btn-lg px-5 py-3">Ke Dashboard Saya</a>
         </div>
     @else
         <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">

@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-white fw-bold mb-0">Dashboard Penumpang</h1>
         @if(!$hasActiveRegistration)
-            <a href="{{ route('passenger.registration.step1') }}" class="btn btn-primary">
+            <a href="{{ route('passenger.registration.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Daftar Baru
             </a>
         @endif
@@ -17,7 +17,7 @@
                 <i class="fas fa-clipboard-list text-white-50 mb-3" style="font-size: 3rem;"></i>
                 <h5 class="text-white">Belum ada pendaftaran</h5>
                 <p class="text-white-50">Silakan lakukan pendaftaran untuk mulai mudik bersama PGN.</p>
-                <a href="{{ route('passenger.registration.step1') }}" class="btn btn-outline-light mt-2">Daftar Sekarang</a>
+                <a href="{{ route('passenger.registration.create') }}" class="btn btn-outline-light mt-2">Daftar Sekarang</a>
             </div>
         </div>
     @else
@@ -89,7 +89,7 @@
                                 </button>
                             @elseif($reg->status === 'pending')
                                 @if($reg->payment_status !== 'paid')
-                                    <a href="{{ route('passenger.registration.success', $reg) }}" class="btn btn-warning w-100 fw-bold">
+                                    <a href="{{ route('passenger.registration.payment', $reg) }}" class="btn btn-warning w-100 fw-bold">
                                         <i class="fas fa-wallet me-2"></i>Bayar Refundable
                                     </a>
                                 @else
